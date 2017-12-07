@@ -5,7 +5,7 @@ A simple script deployed on AWS Lambda to check the Yahoo Fantasy Football API f
 ## Pre-Requisites
 * YDN Free Account.  You'll need to create an 'app' with yahoo.  [Go Here](https://developer.yahoo.com/apps/) and register and "Create an App".  Select "Installed Application" and give the App a name (feel free to fill out the other information). Select "Fantasy Sports" and "Read".  Hit "Create App".  Once approved (if there is a waiting period) you can click into this app and gather the "Client ID (Consumer Key)" and "Client Secret (Consumer Secret)".
 * Twilio FREE account.  You'll need to gather the following information from them: "sid", "auth_token" and "twilio_number".
-* AWS Free Tier account.  You must join AWS to deploy this script to.
+* AWS Free Tier account.  You must join AWS to deploy this script to. NOTE: You can skip AWS and use this locally with a scheduler or probably use on a raspberry pi with little effort.  AWS Lambda was just easy and free, requiring no extra junk hooked up in my house!
 
 ## Setting up the enviornment
 1. Ensure that you have virtualenv installed (if not, `run pip install virtualenv`)
