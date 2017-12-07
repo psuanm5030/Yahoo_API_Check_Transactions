@@ -2,13 +2,10 @@ all_creds:
   SEND_SMS : 'False' # This is False for local debugging only, as the results are printed to the console.
   YAHOO_CLIENT_ID : '' # Obtained post-creation of the Yahoo App
   YAHOO_CLIENT_SECRET : '' # Obtained post-creation of the Yahoo App
-  LEAGUE_1 : '371.l.11111' # This is the ID assigned in Yahoo's api for your league.
-  LEAGUE_2 : '371.l.22222' # This is the ID assigned in Yahoo's api for your league.
-  LEAGUE_1_NAME : 'League1' # User assigned name for league - to be affixed to TEXT.
-  LEAGUE_2_NAME : 'League2' # User assigned name for league - to be affixed to TEXT.
   DEBUG : 'True' # If True, this will send out a text to let you know texting worked.
   TWILIO_TO : '+4125551212' # The phone number you want the texts to be sent to.
   TWILIO_NUMBER : '+4125559999' # Obtained post-creation of Twilio Account
   TWILIO_SID : '' # Obtained post-creation of Twilio Account
   TWILIO_AUTH_TOKEN : '' # Obtained post-creation of Twilio Account
   CHECK_TIME : '1500' # Minutes since transaction.  Transactions outside this range from now, will be skipped.
+  LOCAL_DEBUG: 'False' # If true, this will send out a test message from Twilio to ensure that it works.

@@ -14,7 +14,7 @@ A simple script deployed on AWS Lambda to check the Yahoo Fantasy Football API f
 4. Run `pip install -r requirements.txt` to install the packages necessary.  This will install the packages into your virtualenv within your project.
 5. Run Locally first.  Run the "check_trans.py" script.  The console will automatically open up a browser window and ask you to authenticate.  Copy the 7 character code and paste into console.  This will create the "yahoo_creds.pkl" file which will be used indefinitely to refresh your tokens.
     - Be sure to setup the "config_example.yml" file and eliminate "_example" from the filename.
-    - Be sure to set `LOCAL_DEBUG = True` in the "config_example.yml" file for local testing.
+    - Be sure to set `LOCAL_DEBUG = True` in the "config_example.yml" file for local testing.  Once completed, change to False before zipping and uploading to AWS.
 6. Because AWS Lambda wants a .ZIP package (inclusive of the packages and scripts), you must create a .ZIP file.
     - First edit this "create_package.sh" script and replace "AWS_Lambda" with the name of your root directory.
     - In the root directory of your project, run the "create_package.sh" script.  This will zip up all the requisite files into a file named "package.zip".  This will be uploaded to AWS in a few steps.
@@ -34,7 +34,7 @@ A simple script deployed on AWS Lambda to check the Yahoo Fantasy Football API f
     - For "Code entry type" select "Upload a .ZIP file".  Then  select/upload the "package.zip" file from your desktop.
     - For "Runtime" ensure "Python 2.7" is selected.
     - For "Handler" type "check_trans.lambda_handler"
-10. Setup the Envioronment Variables for the function.  In the section, create the following Keys with Values:
+10. Setup the Envioronment Variables for the function. In the section, create the following Keys with Values:
     - DEBUG : False
     - CHECK_TIME : 15
     - SEND_SMS : True
@@ -44,6 +44,7 @@ A simple script deployed on AWS Lambda to check the Yahoo Fantasy Football API f
     - TWILIO_TO : INSERT VALUE FROM TWILIO
     - TWILIO_SID : INSERT VALUE FROM TWILIO
     - TWILIO_NUMBER : INSERT VALUE FROM TWILIO
+    - LOCAL_DEBUG : False
 11. In Basic Settings, set "Timeout" value to 30 seconds or higher.
 12. Thats it!  You can now click "save" and you should get texts every 15 mins.
 
