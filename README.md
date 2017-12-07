@@ -13,8 +13,8 @@ A simple script deployed on AWS Lambda to check the Yahoo Fantasy Football API f
 3. In the terminal, navigate to this directory and create a virtual environment `virtualenv my_project` (change to whatever you want).  This is where python and the requisite packages will be installed.  Activate the virtualenv using `source my_project/bin/activate`.
 4. Run `pip install -r requirements.txt` to install the packages necessary.  This will install the packages into your virtualenv within your project.
 5. Run Locally first.  Run the "check_trans.py" script.  The console will automatically open up a browser window and ask you to authenticate.  Copy the 7 character code and paste into console.  This will create the "yahoo_creds.pkl" file which will be used indefinitely to refresh your tokens.
-    - Be sure to setup the "config_example.yml" file.
-    - Be sure to set `LOCAL_DEBUG = True` in the "check_trans.py" file.
+    - Be sure to setup the "config_example.yml" file and eliminate "_example" from the filename.
+    - Be sure to set `LOCAL_DEBUG = True` in the "config_example.yml" file for local testing.
 6. Because AWS Lambda wants a .ZIP package (inclusive of the packages and scripts), you must create a .ZIP file.
     - First edit this "create_package.sh" script and replace "AWS_Lambda" with the name of your root directory.
     - In the root directory of your project, run the "create_package.sh" script.  This will zip up all the requisite files into a file named "package.zip".  This will be uploaded to AWS in a few steps.
@@ -38,10 +38,6 @@ A simple script deployed on AWS Lambda to check the Yahoo Fantasy Football API f
     - DEBUG : False
     - CHECK_TIME : 15
     - SEND_SMS : True
-    - LEAGUE_1 : INSERT YAHOO ID
-    - LEAGUE_1_NAME : INSERT NAME (WHATEVER YOU WANT)
-    - LEAGUE_2 : INSERT YAHOO ID (BLANK IF NO EXTRA LEAGUE)
-    - LEAGUE_2_NAME : INSERT NAME (WHATEVER YOU WANT) (BLANK IF NO EXTRA LEAGUE)
     - YAHOO_CLIENT_SECRET : INSERT VALUE FROM YAHOO
     - YAHOO_CLIENT_ID : INSERT VALUE FROM YAHOO
     - TWILIO_AUTH_TOKEN : INSERT VALUE FROM TWILIO

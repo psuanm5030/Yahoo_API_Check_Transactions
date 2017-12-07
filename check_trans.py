@@ -15,21 +15,16 @@ import yaml
 from sanction import Client as s_client
 from twilio.rest import Client
 
-# For local testing, turn LOCAL_DEBUG to true.
-LOCAL_DEBUG = False
-if LOCAL_DEBUG: # If true, gather variables from config.yml file
-    stream = file('./config.yml', 'r')  # 'document.yaml' contains a single YAML document.
-    creds = yaml.load(stream)
-    creds = creds['all_creds']
 
-    # Sets env variables
+# For local testing, turn LOCAL_DEBUG in "config.yml" to true.
+stream = file('./config.yml', 'r')  # 'document.yaml' contains a single YAML document.
+creds = yaml.load(stream)
+creds = creds['all_creds']
+if creds['LOCAL_DEBUG'] == 'True':
+    # Sets env variables (which are typically sourced from AWS env variables.
     os.environ["SEND_SMS"] = creds['SEND_SMS']
     os.environ["YAHOO_CLIENT_ID"] = creds['YAHOO_CLIENT_ID']
     os.environ["YAHOO_CLIENT_SECRET"] = creds['YAHOO_CLIENT_SECRET']
-    os.environ["LEAGUE_1"] = creds['LEAGUE_1']
-    os.environ["LEAGUE_2"] = creds['LEAGUE_2']
-    os.environ["LEAGUE_1_NAME"] = creds['LEAGUE_1_NAME']
-    os.environ["LEAGUE_2_NAME"] = creds['LEAGUE_2_NAME']
     os.environ["DEBUG"] = creds['DEBUG']
     os.environ["TWILIO_TO"] = creds['TWILIO_TO']
     os.environ["TWILIO_NUMBER"] = creds['TWILIO_NUMBER']
@@ -51,15 +46,10 @@ twilio_sid = os.environ['TWILIO_SID']
 twilio_auth_token = os.environ['TWILIO_AUTH_TOKEN']
 # Other
 check_time = int(os.environ['CHECK_TIME'])
-send_sms = os.environ['SEND_SMS']
+send_sms_bool = os.environ['SEND_SMS']
 
 resource_endpoint='https://fantasysports.yahooapis.com/fantasy/v2'
 PKL_NAME = 'yahoo_creds.pkl'
-league_1 = os.environ['LEAGUE_1']
-league_2 = os.environ['LEAGUE_2']
-league_1_name = os.environ['LEAGUE_1_NAME']
-league_2_name = os.environ['LEAGUE_2_NAME']
-
 
 def access():
     """
@@ -140,7 +130,7 @@ def send_query(url,token):
     d2 = json.loads(d1) # in json format - to be used with object path
     return d2
 
-def get_league_trans(league_key, token, time_elapsed_mins):
+def get_league_trans(league_key, league_name, token, time_elapsed_mins):
     """
     Check the transactions based upon league.
     :param league_key: key in the form of "371.l.83721"
@@ -151,15 +141,12 @@ def get_league_trans(league_key, token, time_elapsed_mins):
     url = resource_endpoint + '/league/{}/transactions'.format(league_key)
     details = send_query(url,token)
     details = details['fantasy_content']['league']['transactions']['transaction']
-    if league_key == league_1:
-        league_name = league_1_name
-    else:
-        league_name = league_2_name
-    # Keep only those occuring in the last
+
+    # Keep only those occuring in the last "time_elapsed_mins" minutes
     # todo check on the 'trade' type of transaction.  un-tested.
     for d in details:
         if d['type'] == 'commish':
-            print 'Commish transaction - ignore.'
+            # print 'Commish transaction - ignore.'
             continue
         t = datetime.fromtimestamp(int(d['timestamp'])) #.strftime('%Y-%m-%d %H:%M:%S')
         elapsed = datetime.now() - t
@@ -180,14 +167,38 @@ def get_league_trans(league_key, token, time_elapsed_mins):
                         p['transaction_data']['type'],
                         team_name,
                         str(int(elapsed_minutes)) + ' mins')
-                    print 'Sending an SMS with this text: {}'.format(body)
-                    if send_sms == 'True': # send SMS if noted
+                    if send_sms_bool == 'True': # send SMS if noted
+                        print 'Sending an SMS with this text: {}'.format(body)
                         send_sms(body)
             except:
                 print 'error'
-                if send_sms == 'True':  # send SMS if noted
+                if send_sms_bool == 'True':  # send SMS if noted
                     send_sms('Error on Transaction - might be commish or something else other than add / drop.')
 
+    return
+
+# Get League IDs
+def get_nfl_league_ids(c):
+    """
+    Get the league IDs for the current year and run check transactions on that league.
+    :param c: Authorization client object
+    :return: nothing
+    """
+    base_url = 'https://fantasysports.yahooapis.com/fantasy/v2/'
+    url = base_url + str.format('users;use_login=1/games/leagues')
+    details = send_query(url, c.access_token)
+    details = details['fantasy_content']['users']['user']['games']['game']
+    year = str(datetime.now().year)
+    for lg1 in details:
+        try:
+            if lg1['exception']:
+                continue
+        except:
+            if lg1['season'] == year and lg1['code'] == 'nfl':
+                print 'Available Leagues: \n'
+                for lg2 in lg1['leagues']['league']:
+                    print 'Running for League: {} (ID: {})'.format(lg2['name'],lg2['league_key'])
+                    get_league_trans(lg2['league_key'], lg2['name'], c.access_token, check_time)
     return
 
 def lambda_handler(event, context):
@@ -208,12 +219,8 @@ def lambda_handler(event, context):
         print 'Couldnt refresh... please authorize...'
         c = access()
 
-    # detail = test_something(c.access_token)
-    print 'league_1 Check initated...'
-    get_league_trans(league_1,c.access_token,check_time)
-    if league_2 != '':
-        print 'league_2 Check initated...'
-        get_league_trans(league_2,c.access_token,check_time)
+    get_nfl_league_ids(c)
+
     print 'Completed check.'
 
 if __name__ == '__main__':
@@ -229,7 +236,5 @@ if __name__ == '__main__':
     # detail = test_something(c.access_token)
 
     # Run
-    get_league_trans(league_1, c.access_token, check_time)
-    if league_2 != '':
-        get_league_trans(league_2, c.access_token, check_time)
+    get_nfl_league_ids(c)
     print 'Completed MANUAL check.'
